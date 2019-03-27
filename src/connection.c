@@ -34,6 +34,9 @@ SEXP RS_MySQL_createConnection(SEXP mgrHandle, RS_MySQL_conParams *conParams) {
   if(conParams->default_file)
     mysql_options(my_connection, MYSQL_READ_DEFAULT_FILE, conParams->default_file);
 
+  // HACK(RWS&LAA): Switch to older default authentication from MySQL 5.7.
+  mysql_options(my_connection, MYSQL_DEFAULT_AUTH, "mysql_native_password");
+
   if(!mysql_real_connect(my_connection,
     conParams->host, conParams->username, conParams->password, conParams->dbname,
     conParams->port, conParams->unix_socket, conParams->client_flag)){
@@ -208,7 +211,7 @@ SEXP RS_DBI_connectionInfo(SEXP conHandle) {
 
   for(i=0; i < con->num_res; i++)
     LST_INT_EL(output,7,(int) i) = con->resultSetIds[i];
-  
+
   UNPROTECT(1);
   return output;
 }
@@ -406,4 +409,3 @@ SEXP rmysql_connection_valid(SEXP con_) {
 
   return ScalarLogical(TRUE);
 }
-
